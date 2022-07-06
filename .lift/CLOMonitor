@@ -21,7 +21,7 @@ function run() {
 
   # TODO custom path and URL
   jsonData=$(clomonitor-linter  --format=json --path Adlik --url https://github.com/Adlik/Adlik)
-  securityData=$(echo $jsonData | jq ".report | .security") # TODO do we want more tests then just security?
+  securityData=$(echo $jsonData | jq ".report | .security")
   securityKeys=$(echo $securityData | jq "keys[]") # list of keys seperated by spaces
 
   echo "["
@@ -50,20 +50,25 @@ function run() {
   echo "]"
 }
 
-function installTool() {
-  # TODO install rust and cargo?
+# already installed: apt update && apt install -y curl jq git
+function installTool() { # TODO >> output.txt
+  # install latest cargo
+  apt-get -y install gcc make
+  curl https://sh.rustup.rs -sSf | sh # TODO this has a command prompt
+  source $HOME/.cargo/env
 
   # install clomonitor-linter
-  #cargo install --git https://github.com/cncf/clomonitor clomonitor-linter
+  cargo install --git https://github.com/cncf/clomonitor clomonitor-linter
 
-  # TODO add clomonitor to path?
+  # install scorecard and add to path
+  curl -LO https://github.com/ossf/scorecard/releases/download/v4.4.0/scorecard_4.4.0_linux_arm64.tar.gz
+  tar xzf scorecard_4.4.0_linux_arm64.tar.gz
+  mv scorecard-linux-arm64 scorecard
+  export PATH=$(pwd):$PATH
 
-  # TODO install scorecard
-
-  # TODO add github token?
-
-  # TODO install JQ
-  :
+  # TODO add github token
+  # how to make a github app https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app
+  # TODO enable app to be installed by all repos ?
 }
 
 if [[ "$cmd" = "run" ]] ; then
