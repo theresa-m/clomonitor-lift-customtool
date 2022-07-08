@@ -20,7 +20,7 @@ function run() {
   installTool
 
   # TODO custom path and URL
-  jsonData=$(clomonitor-linter  --format=json --path Adlik --url https://github.com/Adlik/Adlik)
+  jsonData=$(/root/.cargo/bin/clomonitor-linter  --format=json --path Adlik --url https://github.com/Adlik/Adlik)
   securityData=$(echo $jsonData | jq ".report | .security")
   securityKeys=$(echo $securityData | jq "keys[]") # list of keys seperated by spaces
 
@@ -50,20 +50,19 @@ function run() {
   echo "]"
 }
 
-# already installed: apt update && apt install -y curl jq git
-function installTool() { # TODO >> output.txt
+# Pre installed in container: apt update && apt install -y curl jq git
+function installTool() {
   # install latest cargo
-  apt-get -y install gcc make
-  curl https://sh.rustup.rs -sSf | sh # TODO this has a command prompt
-  source $HOME/.cargo/env
+  apt-get -y install gcc make &>> output.txt
+  curl https://sh.rustup.rs -sSf | sh -s -- -y &>> output.txt
 
   # install clomonitor-linter
-  cargo install --git https://github.com/cncf/clomonitor clomonitor-linter
+  $HOME/.cargo/bin/cargo install --git https://github.com/cncf/clomonitor clomonitor-linter &>> output.txt
 
-  # install scorecard and add to path
-  curl -LO https://github.com/ossf/scorecard/releases/download/v4.4.0/scorecard_4.4.0_linux_arm64.tar.gz
-  tar xzf scorecard_4.4.0_linux_arm64.tar.gz
-  mv scorecard-linux-arm64 scorecard
+  # install scorecard (used by clomonitor-linter for some tests)
+  curl -LO https://github.com/ossf/scorecard/releases/download/v4.4.0/scorecard_4.4.0_linux_arm64.tar.gz &>> output.txt
+  tar xzf scorecard_4.4.0_linux_arm64.tar.gz &>> output.txt
+  mv scorecard-linux-arm64 scorecard &>> output.txt
   export PATH=$(pwd):$PATH
 
   # TODO add github token
