@@ -1,1 +1,8 @@
 .idea
+
+#scorecard files
+scorecard*
+.lift/LICENSE
+.lift/README.md
+
+output.txt

@@ -65,9 +65,7 @@ function installTool() {
   mv scorecard-linux-arm64 scorecard &>> output.txt
   export PATH=$(pwd):$PATH
 
-  # TODO add github token
-  # how to make a github app https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app
-  # TODO enable app to be installed by all repos ?
+  # TODO github authentication
 }
 
 if [[ "$cmd" = "run" ]] ; then
