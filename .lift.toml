@@ -1,1 +1,2 @@
+tools = [] # disable builtin Lift tools
 customTools = [ ".lift/CLOMonitor" ]
