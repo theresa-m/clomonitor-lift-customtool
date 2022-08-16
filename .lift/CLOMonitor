@@ -17,9 +17,9 @@ function applicable() {
 function run() {
   firstResult=1
 
-  installTool
-
-  projectUrl=$(echo $(cd clomonitor-lift-customtool && git remote get-url origin)) #retrieve remote URL
+  # TODO clomonitor only accepts https urls, not ssh. Needs to include "https://" explicitly. Which does Lift use?
+  projectUrlFull=$(echo $(cd $dir && git remote get-url origin))
+  projectUrl=${projectUrlFull::-4}
   jsonData=$(/root/.cargo/bin/clomonitor-linter  --format=json --path $dir --url $projectUrl)
   securityData=$(echo $jsonData | jq ".report | .security")
   securityKeys=$(echo $securityData | jq "keys[]") # list of keys seperated by spaces
