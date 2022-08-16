@@ -28,11 +28,11 @@ function run() {
      while read -ra reportKey ; do #reportKeys as input
       testTypeData=$(echo $reportData | jq "."$reportKey)
       testTypeKeys=$(echo $testTypeData | jq "keys[]") # list of keys seperated by spaces
-      readableTestTypeKey=$(echo $reportKey | tr '_"' ' ') # remove underscores and quotes to make this human readable
+      readableTestTypeKey=$(echo $reportKey | tr '_"' ' ' | sed 's/ *$//g') # remove underscores, quotes, leading and trailing space to make this human readable
 
       while read -ra testKey ; do # testTypeKeys as input
             testData=$(echo $testTypeData | jq "."$testKey)
-            readableTestKey=$(echo $testKey | tr '_"' ' ') # remove underscores and quotes to make this human readable
+            readableTestKey=$(echo $testKey | tr '_"' ' ' | sed 's/ *$//g') # remove underscores, quotes, leading and trailing space to make this human readable
 
             if [ "$(echo $testData | jq ".passed")" = "false" ]; then
                 # add commas between json objects
@@ -46,7 +46,7 @@ function run() {
                 if [[ $testDetails = null ]]; then
                   messageDetails="\"\""
                 else
-                  messageDetails="\"\n\n##$( echo $testDetails | tr -d '"')\""
+                  messageDetails="\"##$( echo $testDetails | tr -d '"')\""
                 fi
 
                 echo "{ \"type\": \"CLOMonitor $readableTestTypeKey: $readableTestKey\", \
