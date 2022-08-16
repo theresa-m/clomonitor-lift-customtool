@@ -69,6 +69,7 @@ function installTool() {
 }
 
 if [[ "$cmd" = "run" ]] ; then
+    installTool
     run
 fi
 if [[ "$cmd" = "applicable" ]] ; then
@@ -76,4 +77,11 @@ if [[ "$cmd" = "applicable" ]] ; then
 fi
 if [[ "$cmd" = "version" ]] ; then
     version
+fi
+if [[ "$cmd" = "setup" ]] ; then
+    installTool
+fi
+if [[ "$cmd" = "test-run" ]] ; then
+    export PATH=$(pwd):$PATH
+    run
 fi
