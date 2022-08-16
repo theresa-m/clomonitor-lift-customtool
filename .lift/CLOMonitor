@@ -21,31 +21,36 @@ function run() {
   projectUrlFull=$(echo $(cd $dir && git remote get-url origin))
   projectUrl=${projectUrlFull::-4}
   jsonData=$(/root/.cargo/bin/clomonitor-linter  --format=json --path $dir --url $projectUrl)
-  securityData=$(echo $jsonData | jq ".report | .security")
-  securityKeys=$(echo $securityData | jq "keys[]") # list of keys seperated by spaces
+  reportData=$(echo $jsonData | jq ".report")
+  reportKeys=$(echo $reportData | jq "keys[]") # list of keys seperated by spaces
 
   echo "["
-
-  echo $securityKeys | while read -ra key ; do
-        # add commas between json objects
-        if [ $firstResult -eq 1 ]; then
-            firstResult=0
-        else
-            echo ","
-        fi
-
-        testData=$(echo $securityData | jq "."$key)
-        readableKey=$(echo $key | tr '_"' ' ') # remove underscores and quotes to make this human readable
-
-        if [ "$(echo $testData | jq ".passed")" = "false" ]; then
-            echo "{ \"type\": \"CLO Monitor:$readableKey\", \
-                \"message\": \"$(echo $testData | jq ".details")\", \
-                \"file\": \"NA\", \
-                \"line\": NA, \
-                \"details_url\": \"https://clomonitor.io/docs/topics/checks/\" \
-              }"
-        fi
-  done
+    echo $reportKeys | while read -ra reportKey ; do
+      testTypeData=$(echo $reportData | jq "."$reportKey)
+      testTypeKeys=$(echo $testTypeData | jq "keys[]") # list of keys seperated by spaces
+      readableTestTypeKey=$(echo $reportKey | tr '_"' ' ') # remove underscores and quotes to make this human readable
+#
+#      echo $testTypeKeys | while read -ra testKey ; do
+#            # add commas between json objects
+#            if [ $firstResult -eq 1 ]; then
+#                firstResult=0
+#            else
+#                echo ","
+#            fi
+#
+#            testData=$(echo $testTypeData | jq "."testKey)
+#            readableKey=$(echo $testKey | tr '_"' ' ') # remove underscores and quotes to make this human readable
+#
+#            if [ "$(echo $testData | jq ".passed")" = "false" ]; then
+#                echo "{ \"type\": \"CLO Monitor: $readableTestTypeKey : $readableKey\", \
+#                    \"message\": \"$(echo $testData | jq ".details")\", \
+#                    \"file\": \"NA\", \
+#                    \"line\": NA, \
+#                    \"details_url\": \"https://clomonitor.io/docs/topics/checks/\" \
+#                  }"
+#            fi
+#      done
+    done
 
   echo "]"
 }
