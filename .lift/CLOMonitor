@@ -44,12 +44,13 @@ function run() {
 
                 testDetails=$(echo $testData | jq ".details")
                 if [[ $testDetails = null ]]; then
-                  message="\"\""
+                  messageDetails=""
                 else
-                  message=$testDetails
+                  messageDetails="\n\n##$( echo $testDetails | tr -d '"') "
                 fi
+                message="\"##Test name: $readableTestKey $messageDetails\""
 
-                echo "{ \"type\": \"CLO Monitor: $readableTestTypeKey : $readableTestKey\", \
+                echo "{ \"type\": \"CLO Monitor: $readableTestTypeKey\", \
                     \"message\": $message, \
                     \"file\": \"NA\", \
                     \"line\":0, \
