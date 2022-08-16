@@ -28,11 +28,11 @@ function run() {
      while read -ra reportKey ; do #reportKeys as input
       testTypeData=$(echo $reportData | jq "."$reportKey)
       testTypeKeys=$(echo $testTypeData | jq "keys[]") # list of keys separated by spaces
-      readableTestTypeKey=$(echo $reportKey | tr '_"' ' ' | sed 's/ *$//g') # remove underscores, quotes, leading and trailing space to make this human readable
+      readableTestTypeKey=$(echo $reportKey | tr '_"' ' ' | sed 's/ *$//g' | sed -e "s/\b\(.\)/\u\1/g") # remove underscores, quotes, leading and trailing space, capitalize each first letter to make this human readable
 
       while read -ra testKey ; do # testTypeKeys as input
             testData=$(echo $testTypeData | jq "."$testKey)
-            readableTestKey=$(echo $testKey | tr '_"' ' ' | sed 's/ *$//g') # remove underscores, quotes, leading and trailing space to make this human readable
+            readableTestKey=$(echo $testKey | tr '_"' ' ' | sed 's/ *$//g' | sed -e "s/\b\(.\)/\u\1/g") # remove underscores, quotes, leading and trailing space, capitalize each first letter to make this human readable
 
             if [ "$(echo $testData | jq ".passed")" = "false" ]; then
                 # add commas between json objects
@@ -49,9 +49,9 @@ function run() {
                   messageDetails="\"##$( echo $testDetails | tr -d '"')\"" # Reformat OpenSSF messages to use header 3 instead of header 1
                 fi
 
-                echo "{ \"type\": \"CLOMonitor $readableTestTypeKey: $readableTestKey\", \
+                echo "{ \"type\": \"$readableTestTypeKey: $readableTestKey\", \
                     \"message\": $messageDetails, \
-                    \"file\": \"NA\", \
+                    \"file\": \"\", \
                     \"line\":0, \
                     \"details_url\": \"https://clomonitor.io/docs/topics/checks/\" \
                   }"
