@@ -25,12 +25,12 @@ function run() {
   reportKeys=$(echo $reportData | jq "keys[]") # list of keys seperated by spaces
 
   echo "["
-    echo $reportKeys | while read -ra reportKey ; do
+     while read -ra reportKey ; do #reportKeys as input
       testTypeData=$(echo $reportData | jq "."$reportKey)
       testTypeKeys=$(echo $testTypeData | jq "keys[]") # list of keys seperated by spaces
       readableTestTypeKey=$(echo $reportKey | tr '_"' ' ') # remove underscores and quotes to make this human readable
 
-      echo $testTypeKeys | while read -ra testKey ; do
+      while read -ra testKey ; do # testTypeKeys as input
             testData=$(echo $testTypeData | jq "."$testKey)
             readableTestKey=$(echo $testKey | tr '_"' ' ') # remove underscores and quotes to make this human readable
 
@@ -42,15 +42,22 @@ function run() {
                     echo ","
                 fi
 
+                testDetails=$(echo $testData | jq ".details")
+                if [[ $testDetails = null ]]; then
+                  message="\"\""
+                else
+                  message=$testDetails
+                fi
+
                 echo "{ \"type\": \"CLO Monitor: $readableTestTypeKey : $readableTestKey\", \
-                    \"message\": \"$(echo $testData | jq ".details")\", \
+                    \"message\": $message, \
                     \"file\": \"NA\", \
-                    \"line\": NA, \
+                    \"line\":0, \
                     \"details_url\": \"https://clomonitor.io/docs/topics/checks/\" \
                   }"
             fi
-      done
-    done
+      done < <(echo $testTypeKeys)
+    done < <(echo $reportKeys)
 
   echo "]"
 }
@@ -74,7 +81,7 @@ function installTool() {
 }
 
 if [[ "$cmd" = "run" ]] ; then
-    installTool
+    #installTool
     run
 fi
 if [[ "$cmd" = "applicable" ]] ; then
