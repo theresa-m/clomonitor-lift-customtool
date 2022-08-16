@@ -44,14 +44,13 @@ function run() {
 
                 testDetails=$(echo $testData | jq ".details")
                 if [[ $testDetails = null ]]; then
-                  messageDetails=""
+                  messageDetails="\"\""
                 else
-                  messageDetails="\n\n##$( echo $testDetails | tr -d '"') "
+                  messageDetails="\"\n\n##$( echo $testDetails | tr -d '"')\""
                 fi
-                message="\"##Test name: $readableTestKey $messageDetails\""
 
-                echo "{ \"type\": \"CLO Monitor: $readableTestTypeKey\", \
-                    \"message\": $message, \
+                echo "{ \"type\": \"CLOMonitor $readableTestTypeKey: $readableTestKey\", \
+                    \"message\": $messageDetails, \
                     \"file\": \"NA\", \
                     \"line\":0, \
                     \"details_url\": \"https://clomonitor.io/docs/topics/checks/\" \
