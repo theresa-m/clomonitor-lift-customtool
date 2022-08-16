@@ -22,12 +22,12 @@ function run() {
   projectUrl=${projectUrlFull::-4}
   jsonData=$(/root/.cargo/bin/clomonitor-linter  --format=json --path $dir --url $projectUrl)
   reportData=$(echo $jsonData | jq ".report")
-  reportKeys=$(echo $reportData | jq "keys[]") # list of keys seperated by spaces
+  reportKeys=$(echo $reportData | jq "keys[]") # list of keys separated by spaces
 
   echo "["
      while read -ra reportKey ; do #reportKeys as input
       testTypeData=$(echo $reportData | jq "."$reportKey)
-      testTypeKeys=$(echo $testTypeData | jq "keys[]") # list of keys seperated by spaces
+      testTypeKeys=$(echo $testTypeData | jq "keys[]") # list of keys separated by spaces
       readableTestTypeKey=$(echo $reportKey | tr '_"' ' ' | sed 's/ *$//g') # remove underscores, quotes, leading and trailing space to make this human readable
 
       while read -ra testKey ; do # testTypeKeys as input
@@ -46,7 +46,7 @@ function run() {
                 if [[ $testDetails = null ]]; then
                   messageDetails="\"\""
                 else
-                  messageDetails="\"##$( echo $testDetails | tr -d '"')\""
+                  messageDetails="\"##$( echo $testDetails | tr -d '"')\"" # Reformat OpenSSF messages to use header 3 instead of header 1
                 fi
 
                 echo "{ \"type\": \"CLOMonitor $readableTestTypeKey: $readableTestKey\", \
