@@ -29,27 +29,27 @@ function run() {
       testTypeData=$(echo $reportData | jq "."$reportKey)
       testTypeKeys=$(echo $testTypeData | jq "keys[]") # list of keys seperated by spaces
       readableTestTypeKey=$(echo $reportKey | tr '_"' ' ') # remove underscores and quotes to make this human readable
-#
-#      echo $testTypeKeys | while read -ra testKey ; do
-#            # add commas between json objects
-#            if [ $firstResult -eq 1 ]; then
-#                firstResult=0
-#            else
-#                echo ","
-#            fi
-#
-#            testData=$(echo $testTypeData | jq "."testKey)
-#            readableKey=$(echo $testKey | tr '_"' ' ') # remove underscores and quotes to make this human readable
-#
-#            if [ "$(echo $testData | jq ".passed")" = "false" ]; then
-#                echo "{ \"type\": \"CLO Monitor: $readableTestTypeKey : $readableKey\", \
-#                    \"message\": \"$(echo $testData | jq ".details")\", \
-#                    \"file\": \"NA\", \
-#                    \"line\": NA, \
-#                    \"details_url\": \"https://clomonitor.io/docs/topics/checks/\" \
-#                  }"
-#            fi
-#      done
+
+      echo $testTypeKeys | while read -ra testKey ; do
+            testData=$(echo $testTypeData | jq "."$testKey)
+            readableTestKey=$(echo $testKey | tr '_"' ' ') # remove underscores and quotes to make this human readable
+
+            if [ "$(echo $testData | jq ".passed")" = "false" ]; then
+                # add commas between json objects
+                if [ $firstResult -eq 1 ]; then
+                    firstResult=0
+                else
+                    echo ","
+                fi
+
+                echo "{ \"type\": \"CLO Monitor: $readableTestTypeKey : $readableTestKey\", \
+                    \"message\": \"$(echo $testData | jq ".details")\", \
+                    \"file\": \"NA\", \
+                    \"line\": NA, \
+                    \"details_url\": \"https://clomonitor.io/docs/topics/checks/\" \
+                  }"
+            fi
+      done
     done
 
   echo "]"
