@@ -60,7 +60,7 @@ function run() {
                     messageDetails="Community meetings are often held to engage community members, hear more voices and get more viewpoints"
                     detailsUrl="https://clomonitor.io/docs/topics/checks/#community-meeting"
                   elif [ $testKey = "\"dco\"" ]; then
-                    messageDetails= "Developer Certificate of Origin. Mechanism for contributors to certify that they wrote or have the right to submit the code they are contributing"
+                    messageDetails="Developer Certificate of Origin. Mechanism for contributors to certify that they wrote or have the right to submit the code they are contributing"
                     detailsUrl="https://clomonitor.io/docs/topics/checks/#developer-certificate-of-origin"
                   elif [ $testKey = "\"github_discussions\"" ]; then
                     messageDetails="Projects should enable discussions in their repositories"
