@@ -25,10 +25,10 @@ function run() {
   reportKeys=$(echo $reportData | jq "keys[]") # list of keys separated by spaces
 
   echo "["
-     while read -ra reportKey ; do #reportKeys as input
-      testTypeData=$(echo $reportData | jq "."$reportKey)
+     while read -ra testTypeKey ; do #reportKeys as input
+      testTypeData=$(echo $reportData | jq "."$testTypeKey)
       testTypeKeys=$(echo $testTypeData | jq "keys[]") # list of keys separated by spaces
-      readableTestTypeKey=$(echo $reportKey | tr '_"' ' ' | sed 's/ *$//g' | sed -e "s/\b\(.\)/\u\1/g") # remove underscores, quotes, leading and trailing space, capitalize each first letter to make this human readable
+      readableTestTypeKey=$(echo $testTypeKey | tr '_"' ' ' | sed 's/ *$//g' | sed -e "s/\b\(.\)/\u\1/g") # remove underscores, quotes, leading and trailing space, capitalize each first letter to make this human readable
 
       while read -ra testKey ; do # testTypeKeys as input
             testData=$(echo $testTypeData | jq "."$testKey)
@@ -42,18 +42,132 @@ function run() {
                     echo ","
                 fi
 
-                testDetails=$(echo $testData | jq ".details")
-                if [[ $testDetails = null ]]; then
-                  messageDetails="\"\""
-                else
-                  messageDetails="\"##$( echo $testDetails | tr -d '"')\"" # Reformat OpenSSF messages to use header 3 instead of header 1
+                # add descriptions and helpful links for each known test
+                messageDetails="\"\"" # default is empty
+                detailsUrl="https://clomonitor.io/docs/topics/checks/" # default links to an overview of all tests
+
+                if [ $testTypeKey = "\"best_practices\"" ]; then
+                  if [ $testKey = "\"analytics\"" ]; then
+                    messageDetails="Projects websites should provide some web analytics"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#analytics"
+                  elif [ $testKey = "\"artifacthub_badge\"" ]; then
+                    messageDetails="Projects can list their content on Artifact Hub to improve their discoverability"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#artifact-hub-badge"
+                  elif [ $testKey = "\"cla\"" ]; then
+                    messageDetails="Contributor License Agreement. Defines the terms under which intellectual property has been contributed to a company/project"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#contributor-license-agreement"
+                  elif [ $testKey = "\"community_meeting\"" ]; then
+                    messageDetails="Community meetings are often held to engage community members, hear more voices and get more viewpoints"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#community-meeting"
+                  elif [ $testKey = "\"dco\"" ]; then
+                    messageDetails= "Developer Certificate of Origin. Mechanism for contributors to certify that they wrote or have the right to submit the code they are contributing"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#developer-certificate-of-origin"
+                  elif [ $testKey = "\"github_discussions\"" ]; then
+                    messageDetails="Projects should enable discussions in their repositories"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#github-discussions"
+                  elif [ $testKey = "\"openssf_badge\"" ]; then
+                    messageDetails="The Open Source Security Foundation (OpenSSF) Best Practices badge is a way for Free/Libre and Open Source Software (FLOSS) projects to show that they follow best practices"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#openssf-badge"
+                  elif [ $testKey = "\"recent_release\"" ]; then
+                    messageDetails="The project should have released at least one version in the last year"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#recent-release"
+                  elif [ $testKey = "\"slack_presence\"" ]; then
+                    messageDetails="Projects should have presence in the CNCF Slack or Kubernetes Slack"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#slack-presence"
+                  fi
+                elif [ $testTypeKey = "\"documentation\"" ]; then
+                  if [ $testKey = "\"adopters\"" ]; then
+                    messageDetails="List of organizations using this project in production or at stages of testing"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#adopters"
+                  elif [ $testKey = "\"changelog\"" ]; then
+                    messageDetails="A curated, chronologically ordered list of notable changes for each version"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#changelog"
+                  elif [ $testKey = "\"code_of_conduct\"" ]; then
+                    messageDetails="Adopt a code of conduct to define community standards, signal a welcoming and inclusive project, and outline procedures for handling abuse"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#code-of-conduct"
+                  elif [ $testKey = "\"contributing\"" ]; then
+                    messageDetails="A contributing file in your repository provides potential project contributors with a short guide to how they can help with your project"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#contributing"
+                  elif [ $testKey = "\"governance\"" ]; then
+                    messageDetails="Document that explains how the governance and committer process works in the repository"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#governance"
+                  elif [ $testKey = "\"maintainers\"" ]; then
+                    messageDetails="The maintainers file contains a list of the current maintainers of the repository"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#maintainers"
+                  elif [ $testKey = "\"readme\"" ]; then
+                    messageDetails="The readme file introduces and explains a project. It contains information that is commonly required to understand what the project is about"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#readme"
+                  elif [ $testKey = "\"roadmap\"" ]; then
+                    messageDetails="Defines a high-level overview of the project's goals and deliverables ideally presented on a timeline"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#roadmap"
+                  elif [ $testKey = "\"website\"" ]; then
+                    messageDetails="A url that users can visit to learn more about your project"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#website"
+                  fi
+                elif [ $testTypeKey = "\"legal\"" ]; then
+                  if [ $testKey = "\"trademark_disclaimer\"" ]; then
+                    messageDetails="Projects sites should have the Linux Foundation trademark disclaimer"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#trademark-disclaimer"
+                  fi
+                elif [ $testTypeKey = "\"license\"" ]; then
+                  if [ $testKey = "\"license_approved\"" ]; then
+                    messageDetails="Whether the repository uses an approved license or not"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#approved-license"
+                  elif [ $testKey = "\"license_scanning\"" ]; then
+                    messageDetails="License scanning software scans and automatically identifies, manages and addresses open source licensing issues"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#license-scanning"
+                  elif [ $testKey = "\"license_spdx_id\"" ]; then
+                    messageDetails="The LICENSE file contains the repository's license"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#spdx-id"
+                  fi
+                elif [ $testTypeKey = "\"security\"" ]; then
+                  if [ $testKey = "\"binary_artifacts\"" ]; then
+                    messageDetails="Whether the project has generated executable (binary) artifacts in the source repository"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#binary-artifacts-from-openssf-scorecard"
+                  elif [ $testKey = "\"branch_protection\"" ]; then
+                    messageDetails="A project's default and release branches are protected with GitHub's branch protection settings"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#branch-protection-from-openssf-scorecard"
+                  elif [ $testKey = "\"code_review\"" ]; then
+                    messageDetails="The project requires code review before pull requests (merge requests) are merged"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#code-review-from-openssf-scorecard"
+                  elif [ $testKey = "\"dangerous_workflow\"" ]; then
+                    messageDetails="Whether the project's GitHub Action workflows has dangerous code patterns"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#dangerous-workflow-from-openssf-scorecard"
+                  elif [ $testKey = "\"dependency_update_tool\"" ]; then
+                    messageDetails="The project uses a dependency update tool, specifically dependabot or renovatebot"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#dependency-update-tool-from-openssf-scorecard"
+                  elif [ $testKey = "\"maintained\"" ]; then
+                    messageDetails="Whether the project is actively maintained"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#maintained-from-openssf-scorecard"
+                  elif [ $testKey = "\"sbom\"" ]; then
+                    messageDetails="List of components in a piece of software, including licenses, versions, etc"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#software-bill-of-materials-sbom"
+                  elif [ $testKey = "\"security_policy\"" ]; then
+                    messageDetails="Clearly documented security processes explaining how to report security issues to the project"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#security-policy"
+                  elif [ $testKey = "\"signed_releases\"" ]; then
+                    messageDetails="The project cryptographically signs release artifacts"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#signed-releases-from-openssf-scorecard"
+                  elif [ $testKey = "\"token_permissions\"" ]; then
+                    messageDetails="Whether the project's automated workflows tokens are set to read-only by default"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#token-permissions-from-openssf-scorecard"
+                  elif [ $testKey = "\"vulnerabilities\"" ]; then
+                    messageDetails="Whether the project has open, unfixed vulnerabilities (uses the OSV -Open Source Vulnerabilities- service)"
+                    detailsUrl="https://clomonitor.io/docs/topics/checks/#vulnerabilities-from-openssf-scorecard"
+                  fi
+                fi
+
+                # add additional details like from OpenSSF scorecard
+                testDetails=$(echo $testData | jq ".details" )
+                if [[ $testDetails != null ]]; then
+                  messageDetails="$messageDetails \n\n##$( echo $testDetails | tr -d '"')"
                 fi
 
                 echo "{ \"type\": \"$readableTestTypeKey: $readableTestKey\", \
-                    \"message\": $messageDetails, \
+                    \"message\": \"$messageDetails\", \
                     \"file\": \"\", \
                     \"line\":0, \
-                    \"details_url\": \"https://clomonitor.io/docs/topics/checks/\" \
+                    \"details_url\": \"$detailsUrl\" \
                   }"
             fi
       done < <(echo $testTypeKeys)
