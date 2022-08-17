@@ -162,8 +162,6 @@ function run() {
                 if [[ $testDetails != null ]]; then
                   messageDetails="$messageDetails \n\n##$( echo $testDetails | tr -d '"')"
                 fi
-                # newline so resource link is on a new line
-                messageDetails="$messageDetails\n"
 
                 echo "{ \"type\": \"$readableTestTypeKey: $readableTestKey\", \
                     \"message\": \"$messageDetails\", \
